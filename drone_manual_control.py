@@ -127,8 +127,8 @@ the code below is only for the testing part::: not main module
 #---- MAIN FUNCTION    
 #---- Only Main module 
 if __name__ == "__main__":
-    #-- creating an instance of the class for the drone control and commands
-    drone = droneCommands('127.0.0.1:14550')
+    #-- creating an instance of the class for the drone control and commands                      
+    drone = droneCommands('127.0.0.1:14550') #-> this will be changed manually at the testing spot
     print('this is the main module page which means its the manual control program\n')
     while drone.running == True:
         #-- manual control test
@@ -177,8 +177,6 @@ if __name__ == "__main__":
                     drone.right()
                 else:
                     drone.right_r()
-
-            
 
         except:
             print("useless key was pressed :)")  # if user pressed a key other than the given key the loop will break
