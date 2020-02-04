@@ -9,7 +9,7 @@ class droneCommands:
         self.vehicle = connect(COM_PORT_IP, wait_ready=True) #-- if we using ip : '127.0.0.1:14550' #-- if using COM :: manual find : 'COMx'
         self.gnd_speed = 5 #[m/s]
         self.drone_running = True
-        print("Mode: %s" % vehicle.mode.name)
+        print("Mode: %s" % self.vehicle.mode.name)
         self.flight_mode_with_or_without_reset = False
         self.sleep_before_reset = 0.7
     #-- this function is the take off function
@@ -124,9 +124,11 @@ class droneCommands:
 """ 
 the code below is only for the testing part::: not main module
 """
+control = False
+drone = droneCommands('COM3') #-> this will be changed manually at the testing spot
 #---- MAIN FUNCTION    
 #---- Only Main module 
-if __name__ == "__main__":
+if __name__ == "__main__" and control == True:
     #-- creating an instance of the class for the drone control and commands                      
     drone = droneCommands('127.0.0.1:14550') #-> this will be changed manually at the testing spot
     print('this is the main module page which means its the manual control program\n')
