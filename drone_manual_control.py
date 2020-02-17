@@ -1,18 +1,21 @@
-from dronekit import connect
+import dronekit
 from time import sleep
 import keyboard 
 from pymavlink import mavutil
+com = "COM4"
 #-- this class is a class that contains all the functions of the drone controler
 class droneCommands:
     def __init__(self, COM_PORT_IP):
         # Connect to UDP endpoint.
-        self.vehicle = connect(COM_PORT_IP, wait_ready=True) #-- if we using ip : '127.0.0.1:14550' #-- if using COM :: manual find : 'COMx'
+        self.vehicle = dronekit.connect(COM_PORT_IP, wait_ready=False, baud=57600 ) #-- if we using ip : '127.0.0.1:14550' #-- if using COM :: manual find : 'COMx' usualy COM3
         self.gnd_speed = 5 #[m/s]
         self.drone_running = True
         print("Mode: %s" % self.vehicle.mode.name)
         self.flight_mode_with_or_without_reset = False
         self.sleep_before_reset = 0.7
     #-- this function is the take off function
+    def Fmode(self):
+        return self.vehicle.mode
     def arm_and_takeoff(self, aTargetAltitude):
         """
         Arms vehicle and fly to aTargetAltitude.
@@ -25,7 +28,7 @@ class droneCommands:
 
         print ("Arming motors")
         # Copter should arm in GUIDED mode
-        self.vehicle.mode    = VehicleMode("GUIDED")
+        self.vehicle.mode    = dronekit.VehicleMode("GUIDED")
         self.vehicle.armed   = True
 
         # Confirm vehicle armed before attempting to take off
@@ -56,8 +59,9 @@ class droneCommands:
             vx, vy, vz,     #-- VELOCITY
             0, 0, 0,        #-- ACCELERATIONS
             0, 0)
-        vehicle.send_mavlink(message)
-        vehicle.flush()
+        self.vehicle.send_mavlink(message)
+        self.vehicle.flush()
+       
 
         #--- all the functions below will send a message to the drone and command will run untill the command to reset velocity is sent ---#
 
@@ -77,25 +81,25 @@ class droneCommands:
     def right(self):
         self.set_velocity_body(0,self.gnd_speed,0)
     
-    #-- this function moved the drone forward and resets
+    #-- this function moved the drone forward and resets velocity 
     def up_r(self):
         self.set_velocity_body(self.gnd_speed,0,0)
         sleep(self.sleep_before_reset)
         self.reset_velocity()
 
-    #-- this function moved the drone backwards and resets
+    #-- this function moved the drone backwards and resets velocity
     def down_r(self):
         self.set_velocity_body(-self.gnd_speed,0,0)
         sleep(self.sleep_before_reset)
         self.reset_velocity()
 
-    #-- this function moved the drone left and resets
+    #-- this function moved the drone left and resets velocity
     def left_r(self):
         self.set_velocity_body(0,-self.gnd_speed,0)
         sleep(self.sleep_before_reset)
         self.reset_velocity()
 
-    #-- this function moved the drone right and resets
+    #-- this function moved the drone right and resets velocity
     def right_r(self):
         self.set_velocity_body(0,self.gnd_speed,0)
         sleep(self.sleep_before_reset)
@@ -104,7 +108,7 @@ class droneCommands:
     #-- this function changes the drone mode to rtl
     def mode_RTL(self):
         print('r was pressed -> setting vehicle to RTL MODE')
-        self.vehicle.mode = VehicleMode("RTL")
+        self.vehicle.mode = dronekit.VehicleMode("RTL")
         print('RTL ON -> returning to the start point \n', '[system]: ending the program')
         self.drone_running = False
 
@@ -112,7 +116,7 @@ class droneCommands:
     #-- this function changes the drone mode to loiter
     def mode_LOITER(self):
         print('L was pressed -> setting vehicle to LOITER MODE')
-        self.vehicle.mode = VehicleMode("LOITER")
+        self.vehicle.mode = dronekit.VehicleMode("LOITER")
 
     #-- this function resets the velocity of the drone body. stops the drone in place i believe
     def reset_velocity(self):
@@ -125,17 +129,19 @@ class droneCommands:
 the code below is only for the testing part::: not main module
 """
 control = False
-drone = droneCommands('COM3') #-> this will be changed manually at the testing spot
+if not control:
+    drone = droneCommands(com) #-> this will be changed manually at the testing spot
 #---- MAIN FUNCTION    
 #---- Only Main module 
+while(not control):
+    print(drone.Fmode())
 if __name__ == "__main__" and control == True:
     #-- creating an instance of the class for the drone control and commands                      
-    drone = droneCommands('127.0.0.1:14550') #-> this will be changed manually at the testing spot
+    drone = droneCommands(com) #-> this will be changed manually at the testing spot
     print('this is the main module page which means its the manual control program\n')
-    while drone.running == True:
+    while drone.drone_running == True:
         #-- manual control test
         try:
-
             #-- RTL
             if keyboard.is_pressed('r'):
                 drone.mode_RTL()
@@ -151,6 +157,9 @@ if __name__ == "__main__" and control == True:
                     drone.flight_mode_with_or_without_reset = False
                 else:
                     drone.flight_mode_with_or_without_reset = True
+
+            elif keyboard.is_pressed('b'):
+                drone.arm_and_takeoff(3)
 
             #-- FORWARD
             elif keyboard.is_pressed('w'):
@@ -179,6 +188,6 @@ if __name__ == "__main__" and control == True:
                     drone.right()
                 else:
                     drone.right_r()
-
         except:
             print("useless key was pressed :)")  # if user pressed a key other than the given key the loop will break
+        sleep(1)
