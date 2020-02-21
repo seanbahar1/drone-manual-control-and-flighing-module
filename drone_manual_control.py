@@ -45,6 +45,7 @@ class droneCommands:
             print (" Altitude: ", self.vehicle.location.global_relative_frame.alt)
             #Break and return from function just below target altitude.
             if self.vehicle.location.global_relative_frame.alt>=aTargetAltitude*0.95:
+                
                 print ("Reached target altitude")
                 break
         sleep(1)
@@ -128,7 +129,7 @@ class droneCommands:
 """ 
 the code below is only for the testing part::: not main module
 """
-control = False
+control = True
 if not control:
     drone = droneCommands(com) #-> this will be changed manually at the testing spot
 #---- MAIN FUNCTION    
@@ -159,7 +160,9 @@ if __name__ == "__main__" and control == True:
                     drone.flight_mode_with_or_without_reset = True
 
             elif keyboard.is_pressed('b'):
-                drone.arm_and_takeoff(3)
+                drone.arm_and_takeoff(2)
+            elif keyboard.is_pressed('k'):
+                drone.vehicle.mode    = dronekit.VehicleMode("GUIDED")
 
             #-- FORWARD
             elif keyboard.is_pressed('w'):
